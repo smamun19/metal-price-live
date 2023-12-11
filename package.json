@@ -1,7 +1,7 @@
 {
   "name": "metal-price-live",
   "version": "0.1.0",
-  "description": "Live metal prices for react and react native using websocket",
+  "description": "Live metal price hook for react and react native using websocket",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/src/index.d.ts",
