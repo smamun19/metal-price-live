@@ -7,7 +7,7 @@ const useMetalPriceLive = (socketUrl: string) => {
   const minReconnectDelay = 1000;
   const maxReconnectDelay = 300000;
 
-  let currentReconnectDelay = useRef(minReconnectDelay);
+  const currentReconnectDelay = useRef(minReconnectDelay);
 
   const ws = useRef<WebSocket | null>(null);
 
