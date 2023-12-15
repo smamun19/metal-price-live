@@ -1,12 +1,19 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 const useMetalPriceLive = (socketUrl: string) => {
   const [data, setData] = useState();
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<string>();
+  const [retry, setRetry] = useState(0);
+
+  const minReconnectDelay = 1000;
+  const maxReconnectDelay = 300000;
+
+  let currentReconnectDelay = useRef(minReconnectDelay);
 
   const ws = useRef<WebSocket | null>(null);
 
   const handleWsOpen = () => {
     setError(undefined);
+    currentReconnectDelay.current = minReconnectDelay;
   };
 
   const handleWsMessage = (e: WebSocketMessageEvent) => {
@@ -16,19 +23,25 @@ const useMetalPriceLive = (socketUrl: string) => {
     setError(e.message);
   };
 
-  const handleWsClose = useCallback(
-    (e: WebSocketCloseEvent) => {
-      console.log('WebSocket closed unexpectedly');
-      console.debug(e);
-      setError(e?.message ?? 'WebSocket closed unexpectedly');
+  const handleWsClose = (e: WebSocketCloseEvent) => {
+    setError(
+      e?.message ??
+        `WebSocket closed unexpectedly ${currentReconnectDelay.current}`
+    );
 
-      // Retry logic
-      if (ws.current && ws.current.readyState !== WebSocket.OPEN) {
-        ws.current = new WebSocket(socketUrl);
-      }
-    },
-    [socketUrl]
-  );
+    // Retry logic
+    if (ws.current && ws.current.readyState !== WebSocket.OPEN) {
+      setTimeout(() => {
+        //This state is triggering the useEffect for retry logic
+        setRetry((prev) => prev + 1);
+
+        currentReconnectDelay.current = Math.min(
+          currentReconnectDelay.current * 2,
+          maxReconnectDelay
+        );
+      }, currentReconnectDelay.current);
+    }
+  };
 
   useEffect(() => {
     ws.current = new WebSocket(socketUrl);
@@ -46,7 +59,7 @@ const useMetalPriceLive = (socketUrl: string) => {
         ws.current.removeEventListener('close', handleWsClose);
       }
     };
-  }, [handleWsClose, socketUrl]);
+  }, [socketUrl, retry]);
 
   return { data, error };
 };

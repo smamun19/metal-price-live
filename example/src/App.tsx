@@ -7,7 +7,7 @@ export default function App() {
   const data = useMetalPriceLive('ws://localhost:5000');
   return (
     <View style={styles.container}>
-      <Text>Result: {data.data}</Text>
+      <Text>Result: {data.error ?? data.data}</Text>
     </View>
   );
 }
