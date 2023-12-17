@@ -1,19 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-const useMetalPriceLive = (socketUrl: string) => {
+
+const minReconnectDelay = 1000;
+const maxReconnectDelay = 300000;
+const authRetry = 5;
+const errorReason = 'Unauthorized';
+const useMetalPriceLive = (socketUrl: string, apiKey: string) => {
   const [data, setData] = useState();
   const [error, setError] = useState<string>();
   const [retry, setRetry] = useState(0);
-
-  const minReconnectDelay = 1000;
-  const maxReconnectDelay = 300000;
-
-  const currentReconnectDelay = useRef(minReconnectDelay);
+  const maxAuthRetryRef = useRef(0);
+  const currentReconnectDelayRef = useRef(minReconnectDelay);
 
   const ws = useRef<WebSocket | null>(null);
 
   const handleWsOpen = () => {
     setError(undefined);
-    currentReconnectDelay.current = minReconnectDelay;
+    currentReconnectDelayRef.current = minReconnectDelay;
   };
 
   const handleWsMessage = (e: WebSocketMessageEvent) => {
@@ -21,13 +23,19 @@ const useMetalPriceLive = (socketUrl: string) => {
   };
   const handleWsError = (e: WebSocketErrorEvent) => {
     setError(e.message);
+    console.log('error logic', e);
   };
 
   const handleWsClose = (e: WebSocketCloseEvent) => {
-    setError(
-      e?.message ??
-        `WebSocket closed unexpectedly ${currentReconnectDelay.current}`
-    );
+    setError(e?.reason ?? `WebSocket closed unexpectedly`);
+
+    //retry logic on auth fail
+    if (e?.reason === errorReason) {
+      maxAuthRetryRef.current++;
+    }
+    if (authRetry < maxAuthRetryRef.current) {
+      return;
+    }
 
     // Retry logic
     if (ws.current && ws.current.readyState !== WebSocket.OPEN) {
@@ -35,16 +43,16 @@ const useMetalPriceLive = (socketUrl: string) => {
         //This state is triggering the useEffect for retry logic
         setRetry((prev) => prev + 1);
 
-        currentReconnectDelay.current = Math.min(
-          currentReconnectDelay.current * 2,
+        currentReconnectDelayRef.current = Math.min(
+          currentReconnectDelayRef.current * 2,
           maxReconnectDelay
         );
-      }, currentReconnectDelay.current);
+      }, currentReconnectDelayRef.current);
     }
   };
 
   useEffect(() => {
-    ws.current = new WebSocket(socketUrl);
+    ws.current = new WebSocket(`${socketUrl}/${apiKey}`);
     ws.current.addEventListener('open', handleWsOpen);
     ws.current.addEventListener('message', handleWsMessage);
     ws.current.addEventListener('error', handleWsError);
@@ -59,7 +67,7 @@ const useMetalPriceLive = (socketUrl: string) => {
         ws.current.removeEventListener('close', handleWsClose);
       }
     };
-  }, [socketUrl, retry]);
+  }, [socketUrl, retry, apiKey]);
 
   return { data, error };
 };

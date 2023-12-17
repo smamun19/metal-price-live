@@ -4,7 +4,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import useMetalPriceLive from 'metal-price-live';
 
 export default function App() {
-  const data = useMetalPriceLive('ws://localhost:5000');
+  const data = useMetalPriceLive('ws://localhost:5000', 'test');
   return (
     <View style={styles.container}>
       <Text>Result: {data.error ?? data.data}</Text>
