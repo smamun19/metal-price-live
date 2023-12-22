@@ -4,18 +4,29 @@ Live metal prices for react and react native using websocket
 
 ## Installation
 
-```sh
+Using npm:
+
+```
 npm install metal-price-live
+```
+
+Using yarn:
+
+```
+yarn add metal-price-live
 ```
 
 ## Usage
 
-```js
-import { multiply } from 'metal-price-live';
+```tsx
+import useMetalPriceLive from 'metal-price-live';
 
 // ...
 
-const result = await multiply(3, 7);
+const { status, data, error } = useMetalPriceLive(
+  'wss://your-websocket-endpoint',
+  'your-api-key'
+);
 ```
 
 ## Contributing

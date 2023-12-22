@@ -4,10 +4,14 @@ import { StyleSheet, View, Text } from 'react-native';
 import useMetalPriceLive from 'metal-price-live';
 
 export default function App() {
-  const data = useMetalPriceLive('ws://localhost:5000', 'test');
+  const { status } = useMetalPriceLive(
+    'wss://your-websocket-endpoint',
+    'your-api-key'
+  );
+
   return (
     <View style={styles.container}>
-      <Text>Result: {data.error ?? data.data}</Text>
+      <Text>Result: {status}</Text>
     </View>
   );
 }

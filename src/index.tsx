@@ -4,9 +4,40 @@ const minReconnectDelay = 1000;
 const maxReconnectDelay = 300000;
 const authRetry = 5;
 const errorReason = 'Unauthorized';
+
+interface ApiData {
+  timestamp: number;
+  price: number;
+  ask: number;
+  bid: number;
+  price_gram_24k: number;
+  price_gram_22k: number;
+  price_gram_21k: number;
+  key: string;
+}
+
+interface Connected {
+  status: 'connected';
+  data: ApiData;
+  error?: undefined;
+}
+
+interface Connecting {
+  status: 'connecting';
+  data?: ApiData;
+  error?: string;
+}
+interface Error {
+  status: 'error';
+  data?: ApiData;
+  error: string;
+}
+
+type ConnectionState = Connected | Error | Connecting;
 const useMetalPriceLive = (socketUrl: string, apiKey: string) => {
-  const [data, setData] = useState();
-  const [error, setError] = useState<string>();
+  const [connectionState, setConnectionState] = useState<ConnectionState>({
+    status: 'connecting',
+  });
   const [retry, setRetry] = useState(0);
   const maxAuthRetryRef = useRef(0);
   const currentReconnectDelayRef = useRef(minReconnectDelay);
@@ -14,20 +45,27 @@ const useMetalPriceLive = (socketUrl: string, apiKey: string) => {
   const ws = useRef<WebSocket | null>(null);
 
   const handleWsOpen = () => {
-    setError(undefined);
+    setConnectionState({
+      status: 'connecting',
+    });
     currentReconnectDelayRef.current = minReconnectDelay;
   };
 
   const handleWsMessage = (e: WebSocketMessageEvent) => {
-    setData(e.data);
+    setConnectionState({ status: 'connected', data: JSON.parse(e.data) });
   };
   const handleWsError = (e: WebSocketErrorEvent) => {
-    setError(e.message);
-    console.log('error logic', e);
+    setConnectionState({
+      status: 'error',
+      error: e.message || `WebSocket closed unexpectedly`,
+    });
   };
 
   const handleWsClose = (e: WebSocketCloseEvent) => {
-    setError(e?.reason ?? `WebSocket closed unexpectedly`);
+    setConnectionState({
+      status: 'error',
+      error: e?.reason || `WebSocket closed unexpectedly`,
+    });
 
     //retry logic on auth fail
     if (e?.reason === errorReason) {
@@ -69,7 +107,7 @@ const useMetalPriceLive = (socketUrl: string, apiKey: string) => {
     };
   }, [socketUrl, retry, apiKey]);
 
-  return { data, error };
+  return connectionState;
 };
 
 export default useMetalPriceLive;
