@@ -36,6 +36,7 @@
     "gittu": "git add . && git commit && git push"
   },
   "keywords": [
+    "react",
     "react-native",
     "ios",
     "android"
@@ -79,8 +80,7 @@
     "@types/react": "17.0.21"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
+    "react": "*"
   },
   "workspaces": [
     "example"
