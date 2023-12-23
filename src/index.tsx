@@ -7,12 +7,19 @@ const errorReason = 'Unauthorized';
 
 interface ApiData {
   timestamp: number;
-  price: number;
-  ask: number;
-  bid: number;
-  price_gram_24k: number;
-  price_gram_22k: number;
-  price_gram_21k: number;
+  previousClosePrice: number;
+  openingPrice: number;
+  lowPrice: number;
+  highPrice: number;
+  openTime: number;
+  currentPrice: number;
+  priceChange: number;
+  priceChangePercentage: number;
+  askPrice: number;
+  bidPrice: number;
+  priceGram24k: number;
+  priceGram22k: number;
+  priceGram21k: number;
   key: string;
 }
 
