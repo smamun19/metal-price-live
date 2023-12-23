@@ -1,18 +1,17 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'metal-price-live';
+import useMetalPriceLive from 'metal-price-live';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
-  }, []);
+  const { status } = useMetalPriceLive(
+    'wss://your-websocket-endpoint',
+    'your-api-key'
+  );
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Result: {status}</Text>
     </View>
   );
 }
