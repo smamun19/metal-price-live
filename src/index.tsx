@@ -18,6 +18,7 @@ interface ApiData {
   askPrice: number;
   bidPrice: number;
   priceGram24k: number;
+  priceGram23k: number;
   priceGram22k: number;
   priceGram21k: number;
   key: string;
