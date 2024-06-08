@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 
-const minReconnectDelay = 1000;
-const maxReconnectDelay = 300000;
-const authRetry = 5;
+const minReconnectDelay = 2000;
+//const maxReconnectDelay = 300000;
+const authRetry = 5000;
 const errorReason = 'Unauthorized';
 
 interface ApiData {
@@ -89,10 +89,13 @@ const useMetalPriceLive = (socketUrl: string, apiKey: string) => {
         //This state is triggering the useEffect for retry logic
         setRetry((prev) => prev + 1);
 
-        currentReconnectDelayRef.current = Math.min(
-          currentReconnectDelayRef.current * 2,
-          maxReconnectDelay
-        );
+        // currentReconnectDelayRef.current = Math.min(
+        //   currentReconnectDelayRef.current * 2,
+        //   maxReconnectDelay
+        // );
+
+        //temp solution.. if it works, will add dynamic reconnecting logic defined by user
+        currentReconnectDelayRef.current = minReconnectDelay;
       }, currentReconnectDelayRef.current);
     }
   };
