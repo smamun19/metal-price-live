@@ -63,6 +63,7 @@ const useMetalPriceLive = (socketUrl: string, apiKey: string) => {
     setConnectionState({ status: 'connected', data: JSON.parse(e.data) });
   };
   const handleWsError = (e: WebSocketErrorEvent) => {
+    console.log('handleWsError setting the state');
     setConnectionState({
       status: 'error',
       error: e.message || `WebSocket closed unexpectedly`,
@@ -79,12 +80,18 @@ const useMetalPriceLive = (socketUrl: string, apiKey: string) => {
     if (e?.reason === errorReason) {
       maxAuthRetryRef.current++;
     }
+
+    console.log(`first Error log  ${e}`);
     if (authRetry < maxAuthRetryRef.current) {
       return;
     }
 
     // Retry logic
+    console.log(
+      `before retry logic socket: ${ws.current}, readyState: ${ws.current?.readyState} `
+    );
     if (ws.current && ws.current.readyState !== WebSocket.OPEN) {
+      console.log(`inside retry logic: ${ws.current}`);
       setTimeout(() => {
         //This state is triggering the useEffect for retry logic
         setRetry((prev) => prev + 1);
