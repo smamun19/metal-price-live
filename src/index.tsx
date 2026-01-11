@@ -22,6 +22,18 @@ interface ApiData {
   priceGram22k: number;
   priceGram21k: number;
   key: string;
+  silver: {
+    askPrice: number;
+    bidPrice: number;
+    highPrice: number;
+    lowPrice: number;
+    openTime: number;
+    openingPrice: number;
+    previousClosePrice: number;
+    priceChange: number;
+    priceChangePercentage: number;
+    timestamp: number;
+  };
 }
 
 interface Connected {
